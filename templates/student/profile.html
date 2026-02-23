@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block title %}Student Profile - PlacementHub{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <h1 class="h2 mb-4">Student Profile</h1>
+
+            <!-- Personal & Contact Information -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-person-badge"></i> Account Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <p class="text-muted mb-1">Username</p>
+                            <h6>{{ current_user.username }}</h6>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="text-muted mb-1">Email</p>
+                            <h6>{{ current_user.email }}</h6>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <p class="text-muted mb-1">Phone Number</p>
+                            <h6>{{ student.phone or 'Not provided' }}</h6>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="text-muted mb-1">Alternate Phone</p>
+                            <h6>{{ student.alternate_phone or 'Not provided' }}</h6>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Academic Information -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="bi bi-mortarboard"></i> Academic Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <p class="text-muted mb-1">Roll Number</p>
+                            <h6>{{ student.roll_number }}</h6>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="text-muted mb-1">Branch/Department</p>
+                            <h6>{{ student.branch }}</h6>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <p class="text-muted mb-1">Current Semester</p>
+                            <h6>{{ student.semester }}</h6>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="text-muted mb-1">Current CGPA</p>
+                            <h6><span class="badge bg-success">{{ "%.2f"|format(student.cgpa) }}</span></h6>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resume Section -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="bi bi-file-earmark-pdf"></i> Resume</h5>
+                </div>
+                <div class="card-body">
+                    {% if student.resume_path %}
+                    <div class="d-flex align-items-center justify-content-between p-3 border rounded">
+                        <div>
+                            <i class="bi bi-file-earmark-check text-success fs-4 me-2"></i>
+                            <span>Resume Uploaded</span>
+                            <small class="text-muted d-block">Uploaded on: {{
+                                student.resume_uploaded_at.strftime('%d-%m-%Y') if student.resume_uploaded_at else 'N/A'
+                                }}</small>
+                        </div>
+                        <div>
+                            <a href="{{ url_for('student.download_resume') }}" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-download"></i> Download
+                            </a>
+                            <form action="{{ url_for('student.delete_resume') }}" method="POST" class="d-inline"
+                                onsubmit="return confirm('Are you sure you want to delete your resume?');">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-3">
+                        <p class="text-muted mb-3">No resume uploaded yet.</p>
+                        <a href="{{ url_for('student.edit_profile') }}" class="btn btn-sm btn-primary">
+                            <i class="bi bi-upload"></i> Upload Resume
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="bi bi-gear"></i> Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2 d-md-block">
+                        <a href="{{ url_for('student.edit_profile') }}" class="btn btn-primary">
+                            <i class="bi bi-pencil-square"></i> Edit Profile
+                        </a>
+                        <a href="{{ url_for('auth.change_password') }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-key"></i> Change Password
+                        </a>
+                        <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-danger">
+                            <i class="bi bi-box-arrow-right"></i> Logout
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

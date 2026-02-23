@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}My Applications - PlacementHub{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="h2">My Applications</h1>
+            <p class="text-muted">Track your application status</p>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form method="GET" class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Filter by Status</label>
+                    <select name="status" class="form-control">
+                        <option value="">All Applications</option>
+                        <option value="Applied" {% if request.args.get('status')=='Applied' %}selected{% endif %}>
+                            Applied</option>
+                        <option value="Shortlisted" {% if request.args.get('status')=='Shortlisted' %}selected{% endif
+                            %}>Shortlisted</option>
+                        <option value="Selected" {% if request.args.get('status')=='Selected' %}selected{% endif %}>
+                            Selected</option>
+                        <option value="Rejected" {% if request.args.get('status')=='Rejected' %}selected{% endif %}>
+                            Rejected</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">&nbsp;</label>
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-filter"></i> Filter
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Applications Table -->
+    <div class="card shadow-sm">
+        <div class="card-header bg-light">
+            <h5 class="mb-0">Application History</h5>
+        </div>
+        <div class="card-body">
+            {% if applications.items %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Company</th>
+                            <th>Job Title</th>
+                            <th>Status</th>
+                            <th>Applied On</th>
+                            <th>CGPA at Application</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for app in applications.items %}
+                        <tr>
+                            <td><strong>{{ app.company_name }}</strong></td>
+                            <td>{{ app.job_title }}</td>
+                            <td>
+                                {% if app.status == 'Applied' %}
+                                <span class="badge bg-info">Applied</span>
+                                {% elif app.status == 'Shortlisted' %}
+                                <span class="badge bg-primary">Shortlisted</span>
+                                {% elif app.status == 'Selected' %}
+                                <span class="badge bg-success">Selected</span>
+                                {% else %}
+                                <span class="badge bg-danger">Rejected</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ app.application_date.strftime('%d-%m-%Y') if app.application_date else 'N/A' }}</td>
+                            <td>{{ app.cgpa_at_application }}</td>
+                            <td>
+                                <a href="{{ url_for('student.view_application', app_id=app.id) }}"
+                                    class="btn btn-sm btn-primary">
+                                    <i class="bi bi-eye"></i> View
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if applications.pages > 1 %}
+            <nav aria-label="Page navigation" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if applications.has_prev %}
+                    <li class="page-item">
+                        <a class="page-link"
+                            href="{{ url_for('student.applications', page=applications.prev_num) }}">Previous</a>
+                    </li>
+                    {% endif %}
+
+                    {% for page_num in applications.iter_pages() %}
+                    {% if page_num %}
+                    {% if page_num == applications.page %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ page_num }}</span>
+                    </li>
+                    {% else %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('student.applications', page=page_num) }}">{{ page_num
+                            }}</a>
+                    </li>
+                    {% endif %}
+                    {% endif %}
+                    {% endfor %}
+
+                    {% if applications.has_next %}
+                    <li class="page-item">
+                        <a class="page-link"
+                            href="{{ url_for('student.applications', page=applications.next_num) }}">Next</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+            {% else %}
+            <p class="text-muted text-center py-5">
+                No applications yet. <a href="{{ url_for('student.browse_drives') }}">Browse available drives</a>
+            </p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

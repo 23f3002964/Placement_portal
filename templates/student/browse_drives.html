@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block title %}Browse Placement Drives - PlacementHub{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="h2">Browse Placement Drives</h1>
+            <p class="text-muted">Explore available job opportunities</p>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form method="GET" class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Search by Job Title</label>
+                    <input type="text" name="search" class="form-control" placeholder="Enter job title..."
+                        value="{{ request.args.get('search', '') }}">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Filter by Company</label>
+                    <select name="company" class="form-control">
+                        <option value="">All Companies</option>
+                        {% for company in companies %}
+                        <option value="{{ company.id }}" {% if request.args.get('company')|int==company.id %}selected{%
+                            endif %}>
+                            {{ company.company_name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">&nbsp;</label>
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-search"></i> Search
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Drives Grid -->
+    <div class="row">
+        {% if drives.items %}
+        {% for drive in drives.items %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card drive-card shadow-sm h-100">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-1">{{ drive.job_title }}</h5>
+                    <p class="text-muted mb-0 small">{{ drive.company_account.company_name }}</p>
+                </div>
+                <div class="card-body">
+                    <p class="mb-2">
+                        <i class="bi bi-map"></i> <strong>Location:</strong> {{ drive.location }}
+                    </p>
+                    <p class="mb-2">
+                        <i class="bi bi-cash-coin"></i> <strong>Salary:</strong> {{ drive.salary_package }} LPA
+                    </p>
+                    <p class="mb-3 text-muted small">
+                        <i class="bi bi-calendar"></i> Deadline: {{ drive.application_deadline.strftime('%d-%m-%Y') if
+                        drive.application_deadline else 'N/A' }}
+                    </p>
+
+                    <div class="mb-3">
+                        <p class="text-muted small mb-2"><strong>Eligibility:</strong></p>
+                        <p class="small">{{ drive.eligibility_criteria[:100] }}...</p>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('student.view_drive_detail', drive_id=drive.id) }}"
+                            class="btn btn-primary btn-sm">
+                            <i class="bi bi-eye"></i> View Details
+                        </a>
+                        {% if not current_user.has_applied(drive.id) %}
+                        <form action="{{ url_for('student.apply_drive', drive_id=drive.id) }}" method="POST">
+                            <button type="submit" class="btn btn-success btn-sm w-100">
+                                <i class="bi bi-check-circle"></i> Apply Now
+                            </button>
+                        </form>
+                        {% else %}
+                        <button class="btn btn-secondary btn-sm" disabled>
+                            <i class="bi bi-check"></i> Already Applied
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <div class="col-12">
+            <div class="alert alert-info text-center" role="alert">
+                <p class="mb-0">No drives found matching your criteria.</p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Pagination -->
+    {% if drives.pages > 1 %}
+    <nav aria-label="Page navigation" class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if drives.has_prev %}
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('student.browse_drives', page=drives.prev_num) }}">Previous</a>
+            </li>
+            {% endif %}
+
+            {% for page_num in drives.iter_pages() %}
+            {% if page_num %}
+            {% if page_num == drives.page %}
+            <li class="page-item active">
+                <span class="page-link">{{ page_num }}</span>
+            </li>
+            {% else %}
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('student.browse_drives', page=page_num) }}">{{ page_num }}</a>
+            </li>
+            {% endif %}
+            {% endif %}
+            {% endfor %}
+
+            {% if drives.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('student.browse_drives', page=drives.next_num) }}">Next</a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+{% endblock %}

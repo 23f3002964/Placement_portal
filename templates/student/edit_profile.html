@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Profile - PlacementHub{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h2">Edit Profile</h1>
+                <a href="{{ url_for('student.profile') }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> Back to Profile
+                </a>
+            </div>
+
+            <!-- Profile Information Form -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-pencil-square"></i> General Information</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('student.edit_profile') }}">
+                        {{ form.hidden_tag() }}
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form.phone.label(class="form-label") }}
+                                {{ form.phone() }}
+                                {% for error in form.phone.errors %}
+                                <span class="text-danger small">{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form.alternate_phone.label(class="form-label") }}
+                                {{ form.alternate_phone() }}
+                                {% for error in form.alternate_phone.errors %}
+                                <span class="text-danger small">{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form.semester.label(class="form-label") }}
+                                {{ form.semester() }}
+                                {% for error in form.semester.errors %}
+                                <span class="text-danger small">{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form.cgpa.label(class="form-label") }}
+                                {{ form.cgpa() }}
+                                {% for error in form.cgpa.errors %}
+                                <span class="text-danger small">{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="d-grid mt-3">
+                            {{ form.submit(class="btn btn-primary") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Resume Upload Form -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0"><i class="bi bi-file-earmark-pdf"></i> Resume Upload</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('student.edit_profile') }}" enctype="multipart/form-data">
+                        {{ resume_form.hidden_tag() }}
+
+                        <div class="mb-3">
+                            {{ resume_form.resume.label(class="form-label") }}
+                            {{ resume_form.resume() }}
+                            <div class="form-text">Allowed formats: PDF, DOC, DOCX. Max size: 5MB.</div>
+                            {% for error in resume_form.resume.errors %}
+                            <span class="text-danger small">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+
+                        <div class="d-grid">
+                            {{ resume_form.submit(class="btn btn-secondary") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

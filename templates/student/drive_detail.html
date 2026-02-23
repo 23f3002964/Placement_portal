@@ -1,0 +1,316 @@
+{% extends "base.html" %}
+
+{% block title %}{{ drive.job_title }} - {{ drive.company_account.company_name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Breadcrumb Navigation -->
+    <div class="row mb-4">
+        <div class="col">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('student.dashboard') }}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('student.browse_drives') }}">Browse Drives</a></li>
+                    <li class="breadcrumb-item active">{{ drive.job_title }}</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{{ url_for('student.browse_drives') }}" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-left"></i> Back to Drives
+            </a>
+        </div>
+    </div>
+
+    <!-- Drive Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm border-primary">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-2 text-center mb-3 mb-md-0">
+                            <div class="company-logo-placeholder bg-primary text-white rounded-circle mx-auto d-flex align-items-center justify-content-center"
+                                style="width: 100px; height: 100px; font-size: 2rem; font-weight: bold;">
+                                {{ drive.company_account.company_name[:2].upper() }}
+                            </div>
+                        </div>
+                        <div class="col-md-10">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h1 class="mb-2">{{ drive.job_title }}</h1>
+                                    <h4 class="text-primary mb-3">{{ drive.company_account.company_name }}</h4>
+                                    <div class="d-flex flex-wrap gap-3 mb-3">
+                                        {% if drive.salary_package %}
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-currency-dollar text-success me-1"></i>
+                                            <span class="fw-bold">{{ drive.salary_package }} LPA</span>
+                                        </div>
+                                        {% endif %}
+                                        {% if drive.location %}
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-geo-alt text-info me-1"></i>
+                                            <span>{{ drive.location }}</span>
+                                        </div>
+                                        {% endif %}
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-calendar-event text-warning me-1"></i>
+                                            <span>Apply by {{ drive.application_deadline.strftime('%d %B %Y') }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="text-end">
+                                    <div class="mb-2">
+                                        <span
+                                            class="badge bg-{% if drive.status == 'Approved' %}success{% elif drive.status == 'Pending' %}warning{% else %}secondary{% endif %} fs-6">
+                                            {{ drive.status }}
+                                        </span>
+                                    </div>
+                                    {% if drive.is_application_open %}
+                                    <div class="deadline-countdown">
+                                        {% set days_left = drive.days_until_deadline %}
+                                        {% if days_left > 7 %}
+                                        <span class="badge bg-success">{{ days_left }} days left</span>
+                                        {% elif days_left > 0 %}
+                                        <span class="badge bg-warning">{{ days_left }} days left</span>
+                                        {% elif days_left == 0 %}
+                                        <span class="badge bg-danger">Last day!</span>
+                                        {% else %}
+                                        <span class="badge bg-secondary">Closed</span>
+                                        {% endif %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex flex-wrap gap-3 justify-content-center">
+                        {% if drive.is_application_open %}
+                        {% if current_user.has_applied(drive.id) %}
+                        <button class="btn btn-success btn-lg" disabled>
+                            <i class="bi bi-check-circle"></i> Already Applied
+                        </button>
+                        <a href="{{ url_for('student.applications') }}" class="btn btn-outline-primary btn-lg">
+                            <i class="bi bi-eye"></i> View Application
+                        </a>
+                        {% else %}
+                        <form method="POST" action="{{ url_for('student.apply_drive', drive_id=drive.id) }}"
+                            class="d-inline">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-send"></i> Apply Now
+                            </button>
+                        </form>
+                        {% endif %}
+                        {% else %}
+                        <button class="btn btn-secondary btn-lg" disabled>
+                            <i class="bi bi-clock"></i> Applications Closed
+                        </button>
+                        {% endif %}
+
+                        <button class="btn btn-outline-info btn-lg">
+                            <i class="bi bi-bookmark"></i> Save for Later
+                        </button>
+
+                        <button class="btn btn-outline-success btn-lg">
+                            <i class="bi bi-share"></i> Share
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Job Details -->
+    <div class="row mb-4">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="bi bi-file-text"></i> Job Description</h5>
+                </div>
+                <div class="card-body">
+                    <div class="job-description-content">
+                        {{ drive.job_description|safe }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Eligibility Criteria -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="bi bi-check-square"></i> Eligibility Criteria</h5>
+                </div>
+                <div class="card-body">
+                    <div class="eligibility-content">
+                        {{ drive.eligibility_criteria|safe }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Additional Details -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="bi bi-info-circle"></i> Additional Information</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <i class="bi bi-briefcase text-primary me-2"></i>
+                            <strong>Job Type:</strong>
+                            <span class="badge bg-secondary">{{ drive.job_type or 'Full-time' }}</span>
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-graph-up text-success me-2"></i>
+                            <strong>Experience:</strong> {{ drive.experience_required or 'Freshers Welcome' }}
+                        </li>
+                        {% if drive.ctc %}
+                        <li class="mb-2">
+                            <i class="bi bi-cash text-warning me-2"></i>
+                            <strong>CTC:</strong> {{ drive.ctc }} LPA
+                        </li>
+                        {% endif %}
+                        {% if drive.bonus %}
+                        <li class="mb-2">
+                            <i class="bi bi-gift text-info me-2"></i>
+                            <strong>Bonus:</strong> {{ drive.bonus }} LPA
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Company Information -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-building"></i> About {{ drive.company_account.company_name }}</h5>
+                    <a href="{{ url_for('student.view_company', company_id=drive.company_account.id) }}"
+                        class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-eye"></i> View Company Profile
+                    </a>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Industry:</strong> {{ drive.company_account.industry }}</p>
+                            <p><strong>Established:</strong> {{ drive.company_account.established_year or 'Not
+                                specified' }}</p>
+                            <p><strong>Employee Strength:</strong>
+                                {% if drive.company_account.employee_count %}
+                                {{ drive.company_account.employee_count }}+ employees
+                                {% else %}
+                                Not specified
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>HR Contact:</strong> {{ drive.company_account.hr_contact }}</p>
+                            <p><strong>Contact Email:</strong> {{ drive.company_account.company_email }}</p>
+                            {% if drive.company_account.company_website %}
+                            <p><strong>Website:</strong>
+                                <a href="{{ drive.company_account.company_website }}" target="_blank">
+                                    {{ drive.company_account.company_website }}
+                                </a>
+                            </p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Similar Drives -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="bi bi-stars"></i> Similar Opportunities</h5>
+                </div>
+                <div class="card-body">
+                    {% set similar_drives =
+                    drive.company_account.placement_drives.filter_by(status='Approved').limit(4).all() %}
+                    {% if similar_drives %}
+                    <div class="row">
+                        {% for similar_drive in similar_drives %}
+                        <div class="col-md-4 mb-3">
+                            <div class="card border-light h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ similar_drive.job_title }}</h5>
+                                    <p class="text-muted small mb-2">{{ drive.company_account.company_name }}</p>
+                                    {% if similar_drive.salary_package %}
+                                    <p class="mb-2"><strong>{{ similar_drive.salary_package }} LPA</strong></p>
+                                    {% endif %}
+                                    <p class="text-muted small">
+                                        Deadline: {{ similar_drive.application_deadline.strftime('%d-%m-%Y') }}
+                                    </p>
+                                    <a href="{{ url_for('student.view_drive_detail', drive_id=similar_drive.id) }}"
+                                        class="btn btn-sm btn-outline-primary">
+                                        View Details
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted text-center">No similar drives found from this company.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .company-logo-placeholder {
+        font-family: 'Arial', sans-serif;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .job-description-content,
+    .eligibility-content {
+        line-height: 1.6;
+        white-space: pre-wrap;
+    }
+
+    .deadline-countdown .badge {
+        font-size: 1rem;
+        padding: 0.5em 1em;
+    }
+
+    .card.border-primary {
+        border-width: 2px !important;
+    }
+
+    .btn-lg {
+        padding: 0.75rem 1.5rem;
+        font-size: 1.1rem;
+    }
+
+    @media (max-width: 768px) {
+        .btn-lg {
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+
+        .d-flex.flex-wrap.gap-3.justify-content-center {
+            flex-direction: column;
+            align-items: stretch;
+        }
+    }
+</style>
+{% endblock %}
