@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}Student Profile - Admin{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="h3 mb-0">Student Profile</h1>
+        <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-secondary btn-sm">Back to Dashboard</a>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h5 class="mb-3">{{ student.user_account.username }}</h5>
+            <p class="mb-1"><strong>Email:</strong> {{ student.user_account.email }}</p>
+            <p class="mb-1"><strong>Roll Number:</strong> {{ student.roll_number }}</p>
+            <p class="mb-1"><strong>Branch:</strong> {{ student.branch }}</p>
+            <p class="mb-1"><strong>Semester:</strong> {{ student.semester }}</p>
+            <p class="mb-1"><strong>CGPA:</strong> {{ "%.2f"|format(student.cgpa) }}</p>
+            <p class="mb-1"><strong>Phone:</strong> {{ student.phone or 'N/A' }}</p>
+            <p class="mb-1"><strong>Status:</strong> {{ 'Blacklisted' if student.is_blacklisted else 'Active' }}</p>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-light">
+            <h6 class="mb-0">Recent Applications</h6>
+        </div>
+        <div class="card-body">
+            {% if applications %}
+            <div class="table-responsive">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Job Title</th>
+                            <th>Company</th>
+                            <th>Status</th>
+                            <th>Applied</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for app in applications %}
+                        <tr>
+                            <td>{{ app.drive_details.job_title }}</td>
+                            <td>{{ app.drive_details.company_account.company_name }}</td>
+                            <td>{{ app.status }}</td>
+                            <td>{{ app.application_date.strftime('%d-%m-%Y') }}</td>
+                            <td>
+                                <a href="{{ url_for('admin.application_detail', application_id=app.id) }}" class="btn btn-sm btn-outline-primary">View</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-muted mb-0">No applications found for this student.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
