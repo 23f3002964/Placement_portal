@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+
+{% block title %}Home - PlacementHub{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <div class="text-center mb-5">
+    <h1 class="display-4 fw-bold">Welcome to PlacementHub</h1>
+    <p class="lead text-muted">Bridging the gap between talent and opportunity</p>
+  </div>
+
+  <div class="row g-4 mb-5">
+    <div class="col-md-3">
+      <div class="card text-center border-0 shadow-sm p-3 h-100">
+        <div class="card-body">
+          <div class="display-6 text-primary mb-2">
+            <i class="bi bi-people"></i>
+          </div>
+          <h5 class="card-title text-muted small text-uppercase fw-bold">Total Students</h5>
+          <h2 class="fw-bold mb-0">{{ total_students }}</h2>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-center border-0 shadow-sm p-3 h-100">
+        <div class="card-body">
+          <div class="display-6 text-success mb-2">
+            <i class="bi bi-building"></i>
+          </div>
+          <h5 class="card-title text-muted small text-uppercase fw-bold">Total Companies</h5>
+          <h2 class="fw-bold mb-0">{{ total_companies }}</h2>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-center border-0 shadow-sm p-3 h-100">
+        <div class="card-body">
+          <div class="display-6 text-info mb-2">
+            <i class="bi bi-megaphone"></i>
+          </div>
+          <h5 class="card-title text-muted small text-uppercase fw-bold">Active Drives</h5>
+          <h2 class="fw-bold mb-0">{{ total_drives }}</h2>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-center border-0 shadow-sm p-3 h-100">
+        <div class="card-body">
+          <div class="display-6 text-warning mb-2">
+            <i class="bi bi-check2-circle"></i>
+          </div>
+          <h5 class="card-title text-muted small text-uppercase fw-bold">Placements</h5>
+          <h2 class="fw-bold mb-0">{{ total_placements }}</h2>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-lg-8">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="fw-bold mb-0">Recent Drives</h3>
+        <a href="{{ url_for('student.browse_drives') }}" class="btn btn-sm btn-link text-decoration-none">View All</a>
+      </div>
+      <div class="list-group shadow-sm mb-5">
+        {% for drive in recent_drives %}
+        <a href="{{ url_for('student.view_drive_detail', drive_id=drive.id) }}"
+          class="list-group-item list-group-item-action p-3">
+          <div class="d-flex w-100 justify-content-between align-items-center">
+            <div>
+              <h6 class="mb-1 fw-bold">{{ drive.job_title }}</h6>
+              <p class="mb-0 text-muted small">
+                <i class="bi bi-building me-1"></i> {{ drive.company_account.company_name }}
+              </p>
+            </div>
+            <small class="text-primary fw-semibold">View Detail <i class="bi bi-chevron-right small"></i></small>
+          </div>
+        </a>
+        {% else %}
+        <div class="list-group-item text-center py-4 text-muted">
+          <i class="bi bi-info-circle me-2"></i> No recent drives available.
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <h3 class="fw-bold mb-4">Featured Companies</h3>
+      <div class="row g-3">
+        {% for company in featured_companies %}
+        <div class="col-12">
+          <div class="card border-0 shadow-sm h-100 p-2">
+            <div class="card-body d-flex align-items-center">
+              <div class="rounded-circle bg-light p-3 me-3">
+                <i class="bi bi-building text-primary"></i>
+              </div>
+              <div>
+                <h6 class="mb-1 fw-bold">{{ company.company_name }}</h6>
+                <p class="mb-0 text-muted small">{{ company.industry }}</p>
+                <a href="{{ url_for('student.view_company', company_id=company.id) }}" class="stretched-link"></a>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% else %}
+        <div class="col-12">
+          <p class="text-muted">No companies found.</p>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

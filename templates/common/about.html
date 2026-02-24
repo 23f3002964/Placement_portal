@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block title %}About - PlacementHub{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row">
+    <div class="col-md-8">
+      <h1>About PlacementHub</h1>
+      <p class="lead">PlacementHub is a campus placement management system connecting students and employers.</p>
+      <p>It helps manage drives, applications, company approvals, and student profiles.</p>
+    </div>
+    <div class="col-md-4">
+      <h5>Quick Links</h5>
+      <ul class="list-unstyled">
+        <li><a href="{{ url_for('common.features') }}">Features</a></li>
+        <li><a href="{{ url_for('common.faq') }}">FAQ</a></li>
+        <li><a href="{{ url_for('common.contact') }}">Contact</a></li>
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock %}

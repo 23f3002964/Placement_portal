@@ -1,0 +1,332 @@
+{% extends "base.html" %}
+
+{% block title %}Advanced Search - PlacementHub{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="h2">Advanced Search</h1>
+            <p class="text-muted">Search across companies, drives, and students</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{{ url_for('common.home') }}" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-left"></i> Back to Home
+            </a>
+        </div>
+    </div>
+
+    <!-- Search Controls -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="bi bi-search"></i> Search Criteria</h5>
+                </div>
+                <div class="card-body">
+                    <form method="GET" id="searchForm">
+                        <div class="row g-3">
+                            <!-- Search Term -->
+                            <div class="col-md-6">
+                                <label for="searchTerm" class="form-label">Search Term</label>
+                                <input type="text" class="form-control" id="searchTerm" name="q" 
+                                       value="{{ request.args.get('q', '') }}"
+                                       placeholder="Enter keywords to search...">
+                            </div>
+                            
+                            <!-- Entity Type -->
+                            <div class="col-md-3">
+                                <label for="entityType" class="form-label">Search In</label>
+                                <select class="form-select" id="entityType" name="type">
+                                    <option value="all" {% if request.args.get('type') == 'all' or not request.args.get('type') %}selected{% endif %}>All Entities</option>
+                                    <option value="companies" {% if request.args.get('type') == 'companies' %}selected{% endif %}>Companies</option>
+                                    <option value="drives" {% if request.args.get('type') == 'drives' %}selected{% endif %}>Placement Drives</option>
+                                    <option value="students" {% if request.args.get('type') == 'students' %}selected{% endif %}>Students</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Sort By -->
+                            <div class="col-md-3">
+                                <label for="sortBy" class="form-label">Sort By</label>
+                                <select class="form-select" id="sortBy" name="sort">
+                                    <option value="relevance" {% if request.args.get('sort') == 'relevance' or not request.args.get('sort') %}selected{% endif %}>Relevance</option>
+                                    <option value="date_desc" {% if request.args.get('sort') == 'date_desc' %}selected{% endif %}>Newest First</option>
+                                    <option value="date_asc" {% if request.args.get('sort') == 'date_asc' %}selected{% endif %}>Oldest First</option>
+                                    <option value="name_asc" {% if request.args.get('sort') == 'name_asc' %}selected{% endif %}>Name A-Z</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Advanced Filters -->
+                            <div class="col-12">
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" id="activeOnly" name="active" 
+                                           {% if request.args.get('active') %}checked{% endif %}>
+                                    <label class="form-check-label" for="activeOnly">
+                                        Active Only
+                                    </label>
+                                </div>
+                                
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" id="approvedOnly" name="approved" 
+                                           {% if request.args.get('approved') %}checked{% endif %}>
+                                    <label class="form-check-label" for="approvedOnly">
+                                        Approved Only
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <!-- Submit Button -->
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-search"></i> Search
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary ms-2">
+                                    <i class="bi bi-x-circle"></i> Clear Filters
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search Results -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="bi bi-list"></i> Search Results 
+                        {% if results %}
+                            <span class="badge bg-primary">{{ results|length }} found</span>
+                        {% endif %}
+                    </h5>
+                    {% if results %}
+                    <div>
+                        <small class="text-muted">Showing results for: "{{ search_term }}"</small>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    {% if search_performed %}
+                        {% if results %}
+                            <!-- Results Tabs -->
+                            <ul class="nav nav-tabs mb-4" id="resultsTabs" role="tablist">
+                                {% if company_results %}
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active" id="companies-tab" data-bs-toggle="tab" data-bs-target="#companies" type="button" role="tab">
+                                        <i class="bi bi-building"></i> Companies ({{ company_results|length }})
+                                    </button>
+                                </li>
+                                {% endif %}
+                                
+                                {% if drive_results %}
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link {% if not company_results %}active{% endif %}" id="drives-tab" data-bs-toggle="tab" data-bs-target="#drives" type="button" role="tab">
+                                        <i class="bi bi-briefcase"></i> Drives ({{ drive_results|length }})
+                                    </button>
+                                </li>
+                                {% endif %}
+                                
+                                {% if student_results and current_user.is_admin %}
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link {% if not company_results and not drive_results %}active{% endif %}" id="students-tab" data-bs-toggle="tab" data-bs-target="#students" type="button" role="tab">
+                                        <i class="bi bi-people"></i> Students ({{ student_results|length }})
+                                    </button>
+                                </li>
+                                {% endif %}
+                            </ul>
+                            
+                            <!-- Tab Content -->
+                            <div class="tab-content" id="resultsTabContent">
+                                <!-- Companies Tab -->
+                                {% if company_results %}
+                                <div class="tab-pane fade show active" id="companies" role="tabpanel">
+                                    <div class="row">
+                                        {% for company in company_results %}
+                                        <div class="col-md-6 col-lg-4 mb-4">
+                                            <div class="card border-light h-100">
+                                                <div class="card-body">
+                                                    <div class="d-flex align-items-center mb-3">
+                                                        <div class="bg-primary text-white rounded-circle me-3" 
+                                                             style="width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; font-weight: bold;">
+                                                            {{ company.company_name[:2].upper() }}
+                                                        </div>
+                                                        <div>
+                                                            <h5 class="card-title mb-1">{{ company.company_name }}</h5>
+                                                            <span class="badge bg-{% if company.is_approved %}success{% else %}warning{% endif %}">
+                                                                {% if company.is_approved %}Approved{% else %}Pending{% endif %}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <p class="text-muted small mb-2">
+                                                        <i class="bi bi-industry me-1"></i> {{ company.industry }}
+                                                    </p>
+                                                    <p class="text-muted small mb-2">
+                                                        <i class="bi bi-person me-1"></i> {{ company.hr_contact }}
+                                                    </p>
+                                                    <p class="text-muted small mb-3">
+                                                        <i class="bi bi-calendar me-1"></i> Joined {{ company.created_at.strftime('%b %Y') }}
+                                                    </p>
+                                                    
+                                                    <div class="d-grid gap-2">
+                                                        <a href="{{ url_for('student.view_company', company_id=company.id) }}" class="btn btn-sm btn-outline-primary">
+                                                            <i class="bi bi-eye"></i> View Details
+                                                        </a>
+                                                        {% if company.approved_drives > 0 %}
+                                                        <span class="text-center small text-muted">
+                                                            {{ company.approved_drives }} active drive(s)
+                                                        </span>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                {% endif %}
+                                
+                                <!-- Drives Tab -->
+                                {% if drive_results %}
+                                <div class="tab-pane fade {% if not company_results %}show active{% endif %}" id="drives" role="tabpanel">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Job Title</th>
+                                                    <th>Company</th>
+                                                    <th>Package</th>
+                                                    <th>Location</th>
+                                                    <th>Deadline</th>
+                                                    <th>Status</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for drive in drive_results %}
+                                                <tr>
+                                                    <td>
+                                                        <strong>{{ drive.job_title }}</strong>
+                                                        <br><small class="text-muted">{{ drive.eligibility_criteria[:50] }}...</small>
+                                                    </td>
+                                                    <td>{{ drive.company_account.company_name }}</td>
+                                                    <td>
+                                                        {% if drive.salary_package %}
+                                                            <span class="badge bg-success">{{ drive.salary_package }} LPA</span>
+                                                        {% else %}
+                                                            <span class="text-muted">Not disclosed</span>
+                                                        {% endif %}
+                                                    </td>
+                                                    <td>{{ drive.location or 'Multiple Locations' }}</td>
+                                                    <td>{{ drive.application_deadline.strftime('%d-%m-%Y') }}</td>
+                                                    <td>
+                                                        <span class="badge bg-{% if drive.status == 'Approved' %}success{% elif drive.status == 'Pending' %}warning{% else %}secondary{% endif %}">
+                                                            {{ drive.status }}
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <a href="#" class="btn btn-sm btn-outline-primary">View Details</a>
+                                                    </td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                {% endif %}
+                                
+                                <!-- Students Tab (Admin Only) -->
+                                {% if student_results and current_user.is_admin %}
+                                <div class="tab-pane fade {% if not company_results and not drive_results %}show active{% endif %}" id="students" role="tabpanel">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Student Name</th>
+                                                    <th>Roll Number</th>
+                                                    <th>Branch</th>
+                                                    <th>CGPA</th>
+                                                    <th>Email</th>
+                                                    <th>Status</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for student in student_results %}
+                                                <tr>
+                                                    <td><strong>{{ student.user_account.username }}</strong></td>
+                                                    <td>{{ student.roll_number }}</td>
+                                                    <td>{{ student.branch }}</td>
+                                                    <td>
+                                                        <span class="badge bg-{% if student.cgpa >= 8.0 %}success{% elif student.cgpa >= 7.0 %}warning{% else %}secondary{% endif %}">
+                                                            {{ "%.2f"|format(student.cgpa) }}
+                                                        </span>
+                                                    </td>
+                                                    <td>{{ student.user_account.email }}</td>
+                                                    <td>
+                                                        {% if student.is_blacklisted %}
+                                                            <span class="badge bg-dark">Blacklisted</span>
+                                                        {% else %}
+                                                            <span class="badge bg-success">Active</span>
+                                                        {% endif %}
+                                                    </td>
+                                                    <td>
+                                                        <a href="#" class="btn btn-sm btn-outline-primary">View Profile</a>
+                                                    </td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                        {% else %}
+                            <!-- No Results -->
+                            <div class="text-center py-5">
+                                <i class="bi bi-search text-muted" style="font-size: 3rem;"></i>
+                                <h4 class="mt-3">No results found</h4>
+                                <p class="text-muted">
+                                    Try adjusting your search criteria or using different keywords.
+                                </p>
+                                <button class="btn btn-outline-primary">
+                                    <i class="bi bi-arrow-repeat"></i> Clear Search
+                                </button>
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        <!-- Initial State -->
+                        <div class="text-center py-5">
+                            <i class="bi bi-binoculars text-muted" style="font-size: 3rem;"></i>
+                            <h4 class="mt-3">Search Across All Entities</h4>
+                            <p class="text-muted">
+                                Search for companies, placement drives, and students using keywords, filters, and advanced options.
+                            </p>
+                            <div class="row justify-content-center mt-4">
+                                <div class="col-md-8">
+                                    <div class="card border-light">
+                                        <div class="card-body">
+                                            <h5 class="card-title">Search Tips</h5>
+                                            <ul class="text-start">
+                                                <li>Use specific keywords like company names, job titles, or skills</li>
+                                                <li>Filter by entity type to narrow down results</li>
+                                                <li>Use "Active Only" to see currently available options</li>
+                                                <li>Sort results by relevance, date, or alphabetical order</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
