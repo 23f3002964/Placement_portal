@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Placement Drive{% endblock %}
+
+{% block content %}
+<div class="row mt-4">
+    <div class="col-md-8 offset-md-2">
+        <h2 class="text-center">Create Placement Drive</h2>
+        <div class="card mt-4">
+            <div class="card-body">
+                <form action="{{ url_for('company.create_drive') }}" method="POST">
+                    <div class="mb-3">
+                        <label class="form-label" for="job_title">Job Title *</label>
+                        <input type="text" class="form-control" id="job_title" name="job_title" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="job_description">Job Description</label>
+                        <textarea class="form-control" id="job_description" name="job_description" rows="4"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="eligibility_criteria">Eligibility Criteria</label>
+                        <textarea class="form-control" id="eligibility_criteria" name="eligibility_criteria"
+                            rows="2"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="application_deadline">Application Deadline</label>
+                        <input type="date" class="form-control" id="application_deadline" name="application_deadline">
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-success">Submit for Approval</button>
+                        <a href="{{ url_for('company.view_drives') }}" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+            <div class="card-footer text-muted text-center">
+                <small>Note: All new drives must be approved by an administrator before students can apply.</small>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

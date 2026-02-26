@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block title %}View Placement Drives{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <h2>My Placement Drives</h2>
+    </div>
+    <div class="col-md-4 text-end">
+        <a href="{{ url_for('company.create_drive') }}" class="btn btn-success">Create New Drive</a>
+    </div>
+</div>
+<hr>
+
+<div class="row mt-3">
+    <div class="col-md-12">
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Job Title</th>
+                        <th>Create Date</th>
+                        <th>Deadline</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for drive in drives %}
+                    <tr>
+                        <td>{{ drive.job_title }}</td>
+                        <td>{{ drive.created_at.strftime('%Y-%m-%d') }}</td>
+                        <td>{{ drive.application_deadline.strftime('%Y-%m-%d') if drive.application_deadline else 'N/A'
+                            }}</td>
+                        <td>
+                            {% if drive.status == 'Approved' %}
+                            <span class="badge bg-success">Approved</span>
+                            {% elif drive.status == 'Pending' %}
+                            <span class="badge bg-warning text-dark">Pending</span>
+                            {% else %}
+                            <span class="badge bg-secondary">{{ drive.status }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="d-flex gap-1">
+                                <a href="{{ url_for('company.view_applications', drive_id=drive.id) }}"
+                                    class="btn btn-sm btn-outline-primary">View Applications</a>
+                                {% if drive.status != 'Closed' %}
+                                <a href="{{ url_for('company.view_drives', action='close', id=drive.id) }}"
+                                    class="btn btn-sm btn-outline-warning"
+                                    onclick="return confirm('Are you sure you want to close this drive? Students will not be able to apply.');">Close</a>
+                                {% endif %}
+                                <a href="{{ url_for('company.view_drives', action='delete', id=drive.id) }}"
+                                    class="btn btn-sm btn-outline-danger"
+                                    onclick="return confirm('Are you sure you want to delete this drive? All applications will be lost.');">Delete</a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center">No drives found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

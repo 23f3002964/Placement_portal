@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}Company Profile{% endblock %}
+
+{% block content %}
+<div class="row mt-4">
+    <div class="col-md-6 offset-md-3">
+        <h2 class="text-center">Company Profile</h2>
+        <div class="card mt-4">
+            <div class="card-body">
+                <form action="{{ url_for('company.profile') }}" method="POST">
+                    <div class="mb-3">
+                        <label class="form-label" for="username">Username (Read-only)</label>
+                        <input type="text" class="form-control" id="username" value="{{ current_user.username }}"
+                            disabled>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="email">Email (Read-only)</label>
+                        <input type="email" class="form-control" id="email" value="{{ current_user.email }}" disabled>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="company_name">Company Name</label>
+                        <input type="text" class="form-control" id="company_name" name="company_name"
+                            value="{{ profile.company_name }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="hr_contact">HR Contact Name</label>
+                        <input type="text" class="form-control" id="hr_contact" name="hr_contact"
+                            value="{{ profile.hr_contact or '' }}">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="website">Company Website</label>
+                        <input type="url" class="form-control" id="website" name="website"
+                            value="{{ profile.website or '' }}">
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">Save Profile</button>
+                        <a href="{{ url_for('company.dashboard') }}" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

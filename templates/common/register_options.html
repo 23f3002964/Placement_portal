@@ -1,21 +1,15 @@
 {% extends 'base.html' %}
 
-{% block title %}Register - PlacementHub{% endblock %}
+{% block title %}Registration Options{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-  <div class="row justify-content-center">
-    <div class="col-md-6">
-      <div class="card p-4">
-        <h2 class="mb-3">Create an Account</h2>
-        <p class="text-muted">Choose the type of account you want to create.</p>
-
-        <div class="d-grid gap-2">
-          <a href="{{ url_for('auth.register_student') }}" class="btn btn-primary btn-lg">I'm a Student</a>
-          <a href="{{ url_for('auth.register_company') }}" class="btn btn-outline-primary btn-lg">I'm a Company</a>
-          <a href="{{ url_for('common.home') }}" class="btn btn-link">Back to Home</a>
-        </div>
-      </div>
+<div class="row mt-5">
+  <div class="col-md-6 offset-md-3 text-center">
+    <h2>Register</h2>
+    <p>Choose your account type to proceed with registration.</p>
+    <div class="mt-4">
+      <a href="{{ url_for('auth.register_student') }}" class="btn btn-primary d-block mb-3">Register as Student</a>
+      <a href="{{ url_for('auth.register_company') }}" class="btn btn-secondary d-block">Register as Company</a>
     </div>
   </div>
 </div>

@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block title %}Company Dashboard{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2>Company Dashboard</h2>
+        <hr>
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5>My Placement Drives ({{ active_drives_count }})</h5>
+                <p>Manage the drives you have created.</p>
+                <a href="{{ url_for('company.view_drives') }}" class="btn btn-primary">View Drives</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5>Applications ({{ total_applications }})</h5>
+                <p>Review student applications.</p>
+                <a href="{{ url_for('company.view_applications') }}" class="btn btn-primary">View Applications</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5>Company Profile</h5>
+                <p>Update company contact details.</p>
+                <a href="{{ url_for('company.profile') }}" class="btn btn-primary">Edit Profile</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <h4>Recent Activity</h4>
+        {% if recent_activity %}
+        <div class="list-group">
+            {% for app in recent_activity %}
+            <div class="list-group-item">
+                <div class="d-flex w-100 justify-content-between">
+                    <h6 class="mb-1">{{ app.student_profile.user_account.username }} applied for {{
+                        app.drive_details.job_title }}</h6>
+                    <small>{{ app.application_date.strftime('%Y-%m-%d %H:%M') }}</small>
+                </div>
+                <p class="mb-1 text-muted small">Current Status: <span class="fw-bold">{{ app.status }}</span></p>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="alert alert-secondary">
+            No recent applications to display.
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

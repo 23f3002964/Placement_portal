@@ -1,0 +1,35 @@
+:root {
+    --primary-color: #0d6efd;
+    --bg-light: #f8f9fa;
+}
+
+body {
+    font-family: sans-serif;
+    line-height: 1.6;
+    background-color: var(--bg-light);
+}
+
+.navbar {
+    margin-bottom: 2rem;
+}
+
+.card {
+    margin-bottom: 1rem;
+    border-radius: 4px;
+}
+
+.stat-card {
+    text-align: center;
+    padding: 1.5rem;
+}
+
+footer {
+    padding: 2rem 0;
+    background-color: #343a40;
+    color: white;
+    margin-top: 3rem;
+}
+
+.badge {
+    font-size: 0.85rem;
+}

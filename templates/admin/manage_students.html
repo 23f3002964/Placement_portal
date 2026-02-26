@@ -1,185 +1,81 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 
-{% block title %}Manage Students - Admin Panel{% endblock %}
+{% block title %}Manage Students{% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4">
-    <!-- Page Header -->
-    <div class="row mb-4">
-        <div class="col-md-6">
-            <h1 class="h2"><i class="bi bi-people"></i> Student Management</h1>
-            <p class="text-muted">Manage student accounts and placements</p>
-        </div>
-        <div class="col-md-6 text-end">
-            <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-secondary btn-sm">
-                <i class="bi bi-arrow-left"></i> Back to Dashboard
-            </a>
-        </div>
+<div class="row">
+    <div class="col-12">
+        <h2>Manage Students</h2>
+        <hr>
     </div>
+</div>
 
-    <!-- Search Bar -->
-    <div class="row mb-4">
-        <div class="col-md-6">
-            <form method="GET" action="{{ url_for('admin.manage_students') }}" class="input-group">
-                <input type="text" name="search" class="form-control" placeholder="Search by name, ID, or contact..." 
-                       value="{{ search_query }}">
-                <button class="btn btn-primary" type="submit">
-                    <i class="bi bi-search"></i> Search
-                </button>
-                {% if search_query %}
-                <a href="{{ url_for('admin.manage_students') }}" class="btn btn-outline-secondary">
-                    <i class="bi bi-x"></i> Clear
-                </a>
-                {% endif %}
-            </form>
-        </div>
+<div class="row mt-3">
+    <div class="col-md-6 mb-3">
+        <form class="d-flex" action="{{ url_for('admin.manage_students') }}" method="GET">
+            <input class="form-control me-2" type="search" name="q" value="{{ search_query }}"
+                placeholder="Search by name, email or branch">
+            <button class="btn btn-outline-primary" type="submit">Search</button>
+        </form>
     </div>
+</div>
 
-    <!-- Students Table -->
-    <div class="card shadow-sm">
-        <div class="card-header bg-light border-bottom">
-            <h5 class="mb-0">
-                {% if search_query %}
-                    Search Results for "{{ search_query }}"
-                {% else %}
-                    All Students
-                {% endif %}
-            </h5>
-        </div>
-        <div class="card-body">
-            {% if students.items %}
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Name</th>
-                                <th>Email</th>
-                                <th>Phone</th>
-                                <th>Resume</th>
-                                <th>Status</th>
-                                <th>Applications</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for student in students.items %}
-                            <tr>
-                                <td>
-                                    <strong>{{ student.user_account.username }}</strong>
-                                </td>
-                                <td>
-                                    <a href="mailto:{{ student.user_account.email }}">
-                                        {{ student.user_account.email }}
-                                    </a>
-                                </td>
-                                <td>
-                                    {{ student.phone }}
-                                </td>
-                                <td>
-                                    {% if student.resume_path %}
-                                        <a href="{{ url_for('static', filename='uploads/resumes/' + student.resume_path) }}" 
-                                           class="badge bg-success text-white text-decoration-none" download>
-                                            <i class="bi bi-download"></i> Download
-                                        </a>
-                                    {% else %}
-                                        <span class="text-muted">Not uploaded</span>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    {% if student.is_blacklisted %}
-                                        <span class="badge bg-danger">Blacklisted</span>
-                                    {% elif student.user_account.is_active %}
-                                        <span class="badge bg-success">Active</span>
-                                    {% else %}
-                                        <span class="badge bg-secondary">Inactive</span>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    <span class="badge bg-info">{{ app_counts.get(student.id, 0) }}</span>
-                                </td>
-                                <td>
-                                    <div class="btn-group" role="group">
-                                        <a href="{{ url_for('admin.student_detail', student_id=student.id) }}" class="btn btn-sm btn-info" title="View Details">
-                                            <i class="bi bi-eye"></i>
-                                        </a>
-                                        {% if not student.is_blacklisted %}
-                                            <form method="POST" action="{{ url_for('admin.blacklist_student', student_id=student.id) }}" 
-                                                  style="display:inline;">
-                                                <button type="submit" class="btn btn-sm btn-warning" title="Blacklist">
-                                                    <i class="bi bi-ban"></i>
-                                                </button>
-                                            </form>
-                                        {% endif %}
-                                    </div>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Pagination -->
-                {% if students.pages > 1 %}
-                <nav aria-label="Page navigation" class="mt-4">
-                    <ul class="pagination justify-content-center">
-                        {% if students.has_prev %}
-                            <li class="page-item">
-                                <a class="page-link" href="{{ url_for('admin.manage_students', page=students.prev_num, search=search_query) }}">
-                                    Previous
-                                </a>
-                            </li>
-                        {% else %}
-                            <li class="page-item disabled">
-                                <span class="page-link">Previous</span>
-                            </li>
-                        {% endif %}
-
-                        {% for page_num in students.iter_pages() %}
-                            {% if page_num %}
-                                {% if page_num == students.page %}
-                                    <li class="page-item active">
-                                        <span class="page-link">{{ page_num }}</span>
-                                    </li>
-                                {% else %}
-                                    <li class="page-item">
-                                        <a class="page-link" href="{{ url_for('admin.manage_students', page=page_num, search=search_query) }}">
-                                            {{ page_num }}
-                                        </a>
-                                    </li>
-                                {% endif %}
-                            {% else %}
-                                <li class="page-item disabled">
-                                    <span class="page-link">...</span>
-                                </li>
-                            {% endif %}
-                        {% endfor %}
-
-                        {% if students.has_next %}
-                            <li class="page-item">
-                                <a class="page-link" href="{{ url_for('admin.manage_students', page=students.next_num, search=search_query) }}">
-                                    Next
-                                </a>
-                            </li>
-                        {% else %}
-                            <li class="page-item disabled">
-                                <span class="page-link">Next</span>
-                            </li>
-                        {% endif %}
-                    </ul>
-                </nav>
-                {% endif %}
-
-            {% else %}
-                <div class="alert alert-info" role="alert">
-                    <i class="bi bi-info-circle"></i> 
-                    {% if search_query %}
-                        No students found matching "{{ search_query }}"
+<div class="table-responsive">
+    <table class="table table-bordered table-striped">
+        <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Branch</th>
+                <th>CGPA</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for student in students %}
+            <tr>
+                <td>{{ student.id }}</td>
+                <td>{{ student.user_account.username }}</td>
+                <td>{{ student.user_account.email }}</td>
+                <td>{{ student.branch }}</td>
+                <td>{{ student.cgpa }}</td>
+                <td>
+                    {% if student.user_account.is_active and not student.user_account.is_blacklisted %}
+                    <span class="badge bg-success">Active</span>
+                    {% elif student.user_account.is_blacklisted %}
+                    <span class="badge bg-danger">Blacklisted</span>
                     {% else %}
-                        No students registered yet.
+                    <span class="badge bg-secondary">Inactive</span>
                     {% endif %}
-                </div>
-            {% endif %}
-        </div>
-    </div>
+                </td>
+                <td>
+                    <div class="d-flex gap-1 justify-content-center">
+                        {% if student.user_account.is_blacklisted %}
+                        <a href="{{ url_for('admin.manage_students', action='unblacklist', id=student.id) }}"
+                            class="btn btn-sm btn-info">Unblacklist</a>
+                        {% else %}
+                        <a href="{{ url_for('admin.manage_students', action='blacklist', id=student.id) }}"
+                            class="btn btn-sm btn-dark">Blacklist</a>
+                        {% endif %}
+
+                        {% if student.user_account.is_active %}
+                        <a href="{{ url_for('admin.manage_students', action='deactivate', id=student.id) }}"
+                            class="btn btn-sm btn-danger">Deactivate</a>
+                        {% else %}
+                        <a href="{{ url_for('admin.manage_students', action='activate', id=student.id) }}"
+                            class="btn btn-sm btn-success">Activate</a>
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="7" class="text-center">No students found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
 {% endblock %}
