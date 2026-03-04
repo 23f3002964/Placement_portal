@@ -32,5 +32,19 @@ def load_user(user_id):
 # Setup all routes
 setup_routes(app)
 
+with app.app_context():
+    db.create_all()
+    admin_user = UserAccount.query.filter_by(role='admin').first()
+    if not admin_user:
+        admin = UserAccount(
+            username='admin',
+            email='admin@admin.com',
+            password='admin',
+            role='admin'
+        )
+        db.session.add(admin)
+        db.session.commit()
+        print("Default admin user created (Username: admin, Password: admin)")
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5002)
